@@ -1,0 +1,99 @@
+hostname edge2
+!
+vrf def v1
+ rd 1:1
+ exit
+!
+access-list polka4
+ sequence 10 permit 1 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all
+ exit
+!
+server telnet tel
+ security protocol tel
+ vrf v1
+ exit
+!
+router ospf4 1
+ vrf v1
+ router-id 10.1.1.3
+ traffeng-id 0.0.0.0
+ segrout 20
+ area 0 enable
+ area 0 segrout
+ redistribute connected
+ exit
+!
+interface template1
+ no description
+ vrf forwarding v1
+ ipv4 address dynamic dynamic
+ lldp enable
+ shutdown
+ exit
+!
+int lo0
+ template template1
+ vrf forwarding v1
+ ipv4 addr 20.20.0.3 255.255.255.255
+ mpls enable
+ polka enable 3 65536 20
+ router ospf4 1 enable
+ router ospf4 1 area 0
+ router ospf4 1 passive
+ router ospf4 1 segrout index 3
+ router ospf4 1 segrout node
+ no shutdown
+ exit
+!
+int eth1
+ template template1
+ vrf forwarding v1
+ description edge2@eth1 -> core1@eth2
+ ipv4 addr 10.10.2.2 255.255.255.0
+ polka enable 3 65536 20
+ mpls enable
+ router ospf4 1 enable
+ router ospf4 1 area 0 
+ no shutdown
+ exit
+!
+int eth2
+ template template1
+ vrf forwarding v1
+ description edge2@eth2 -> host2@eth1
+ ipv4 addr 40.40.2.1 255.255.255.0
+ polka enable 3 65536 20
+ mpls enable
+ router ospf4 1 enable
+ router ospf4 1 area 0
+ no shutdown
+ exit
+!
+interface tunnel1
+ description POLKA tunnel edge2 -> edge1
+ tunnel vrf v1
+ tunnel source loopback0
+ tunnel destination 20.20.0.1
+ tunnel domain-name 20.20.0.2
+ tunnel mode polka
+ vrf forwarding v1
+ ipv4 address 30.30.0.2 255.255.255.252
+ no shutdown
+ no log-link-change
+ exit
+!
+ipv4 pbr v1 sequence 10 polka4 v1 nexthop 30.30.0.1
+!
+!
+!
+logging buffered debug 10240
+logging file debug /var/log/freertr.log
+logging rotate 655360000 /var/log/freertr.old
+!
+server telnet v1
+ security protocol telnet
+ exec logging
+ login logging
+ vrf v1
+ exit
+!

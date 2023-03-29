@@ -1,0 +1,6 @@
+{TOPOLOGIA}template{HOST}-sw.txt
+{TOPOLOGIA}template{HOST}-hw.txt
+{TOPOLOGIA}interface_map.txt
+cfgnet.sh
+rtr.sh
+tcp-offload-off.sh

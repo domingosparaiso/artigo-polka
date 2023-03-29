@@ -1,0 +1,13 @@
+edge1:eth0:080027E7F8B8:NAT
+edge1:eth1:080027E7F8B9:edge1-host1
+edge1:eth2:080027E7F8BA:core1-edge1
+core1:eth0:080027E7F8BB:NAT
+core1:eth1:080027E7F8BC:core1-edge1
+core1:eth2:080027E7F8BD:core1-edge2
+edge2:eth0:080027E7F8BE:NAT
+edge2:eth1:080027E7F8BF:core1-edge2
+edge2:eth2:080027E7F8C0:edge2-host2
+host1:eth0:080027E7F8B6:NAT
+host1:eth1:080027E7F8B7:edge1-host1
+host2:eth0:080027E7F8C1:NAT
+host2:eth1:080027E7F8C2:edge2-host2
