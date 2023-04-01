@@ -1,100 +1,131 @@
 #!/bin/bash
-# executar "./test3.sh rxr" no core4
-# executar "./test3.sh txr" no core1
-# executar "./test3.sh rxh" no host2
-# executar "./test3.sh txh" no host1
 
-declare -g OPT=$1
+declare -g BANDWIDTH_LIST="10 20 40 80 120"
 declare -g INTERFACE="enp0s8"    # interface de saída do host1 para o edge1
 declare -g IP_HOST="40.40.2.2"   # ip do host2
-declare -g IP_ROUTER="10.10.2.2" # ip do core4
-declare -g IPERFTIME=20
-declare -g SLEEPTIME=20
+declare -g IPERFTIME=60
+declare -g SLEEPTIME=60
 declare -g DELAY=2
-declare -g SAMPLES=3 # Número de vezes que o teste será realizado.
-SSHCONNECTION=$(cat ssh_connection.txt)
-SCRIPT_TUNNEL="~/artigo-polka/artigo/tunnel.sh"
+declare -g SAMPLES=5 # Número de vezes que o teste será realizado.
+declare -g HOST1=8
+declare -g HOST2=9
+SCRIPT_FLUXO=~/artigo-polka/artigo/test3/fluxo.sh
 
+scpexec() {
+	PORT=$1
+	echo "scp -P 220${PORT} root@localhost:$2 $3"
+	scp -P 220${PORT} root@localhost:$2 $3
+}
 
-iperfrxrouter() {
-	echo "Iniciando o servidor iperf UDP..."
-	iperf -s -u -p 5000 & # UDP
+sshexec() {
+	PORT=$1
+	CMD=$2
+	PARALLEL=$3
+	if [ "${PARALLEL}" == "P" ]; then
+		echo "ssh -p 220${PORT} root@localhost \"${CMD}\" &"
+		ssh -p 220${PORT} root@localhost "${CMD}" &
+	else
+		echo "ssh -p 220${PORT} root@localhost \"${CMD}\""
+		ssh -p 220${PORT} root@localhost "${CMD}"
+	fi
+}
+
+stopbwmcore() {
+	CORE=$(echo $1 | cut -f1 -d:)
+	INTERFACE=$(echo $1 | cut -f2 -d:)
+	
+	FILENAME=$2
+	BANDWIDTH=$3
+	echo "Finalizando bwm-ng pela porta 220${CORE}"
+	sshexec ${CORE} "killall bwm-ng 2> /dev/null ; grep ${INTERFACE} tmp.bwm > ${FILENAME}.csv ; rm tmp.bwm"
+	scpexec ${CORE} ${FILENAME}.csv test3/${BANDWIDTH}/${FILENAME}-${CORE}.csv
+}
+
+startbwmcore() {
+	CORE=$(echo $1 | cut -f1 -d:)
+	echo "Iniciando bwm-ng pela porta 220${CORE}"
+	sshexec ${CORE} "bwm-ng -t 1000 -o csv -u bytes -T rate -C ',' > tmp.bwm"
+}
+
+startiperfservers() {
+	echo "Iniciando os servidores iperf TCP..."
+	sshexec ${HOST2} "iperf3 -s -p 5000" P # TCP
+	sshexec ${HOST2} "iperf3 -s -p 5001" P # TCP
+	sshexec ${HOST2} "iperf3 -s -p 5002" P # TCP
 	echo ""
-	read -p "Para cancelar o servidor tecle <ENTER>"
-	killall iperf
+	echo "Servidores iniciados..."
 }
 
-iperfrxhost() {
-	echo "Iniciando o servidor iperf TCP..."
-	iperf -s -t -p 5000 & # TCP
+stopiperfservers() {
+	echo "Parando os servidores iperf TCP..."
+	sshexec ${HOST2} "killall iperf3" A # TCP
 	echo ""
-	read -p "Para cancelar o servidor tecle <ENTER>"
-	killall iperf
+	echo "Servidores parados..."
 }
 
-tunnel() {
-	echo "Tunnel: $1"
-	ssh ${SSHCONNECTION} "${SCRIPT_TUNNEL} $1" > /dev/null
-}
 
-iperftxrouter() {
-	iperf -c ${IP_ROUTER} -N -u -b 50m -p 5000 1>/dev/null
-	read -p "Para cancelar o servidor tecle <ENTER>"
-	killall iperf
+trocafluxo() {
+	echo "Configurando fluxo: $1"
+	${SCRIPT_FLUXO} $1 > /dev/null
 }
 
 iperftxhost() {
 	FILENAME="$1"
 	BANDWIDTH="$2"
-	tunnel 1
-	bwm-ng -t 1000 -o csv -u bytes -T rate -C ',' > tmp.bwm &
+	trocafluxo 1
+	while read C; do
+		$0 startbwmcore ${C} &
+	done < core-routers.txt
+	echo "Iniciando bwm-ng no host1"
+	sshexec ${HOST1} "bwm-ng -t 1000 -o csv -u bytes -T rate -C ',' > tmp.bwm" P
 	sleep ${DELAY}
-	for tun in 1 2 3; do
-		if [ "${tun}" != "1" ]; then
-			tunnel ${tun}
+	for fluxo in 1 2; do
+		if [ "${fluxo}" != "1" ]; then
+			trocafluxo ${fluxo}
 		fi
-		iperf -c ${IP_HOST} -t ${IPERFTIME} -N -t -b ${BANDWIDTH}m -p 5000 1>/dev/null &  ### TCP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5000 --tos 32  1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5001 --tos 64  1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5002 --tos 128 1>/dev/null" P  ### UDP
 		sleep $((${SLEEPTIME} - ${DELAY})) 2> /dev/null
-		killall iperf
+		sshexec ${HOST1} "killall iperf3"
 	done
-	killall bwm-ng
-	mkdir -p test2/${BANDWIDTH}
-	grep ${INTERFACE} tmp.bwm > test2/${BANDWIDTH}/${FILENAME}.csv
+	while read C; do
+		$0 stopbwmcore ${C} ${FILENAME} ${BANDWIDTH} &
+	done < core-routers.txt
+	echo "Finalizando bwm-ng no host1"
+	sshexec ${HOST1} "killall bwm-ng"
+	mkdir -p test3/${BANDWIDTH}
+	scpexec ${HOST1} tmp.bwm .
+	grep ${INTERFACE} tmp.bwm > test3/${BANDWIDTH}/${FILENAME}.csv
 	rm tmp.bwm
 	sleep "${DELAY}"
 }
 
-main() {
-	if [ "${OPT}" == "txh" ]; then
-		killall iperf
-		killall bwm-ng
-		for j in $(seq 10 10 40); do
-			echo "Considerando uma banda de ${j}Mbits/s"
-			for i in $(seq 1 $SAMPLES); do
-				start_time=$(date +%s)
-				echo "Sample # ${i}: Started in: ${start_time}"
-				iperftxhost "a${i}" "$j"
-				end_time=$(date +%s)
-				echo "Sample # ${i}: Finished in: ${end_time}"
-			done
+starttest3() {
+	echo "Iniciando o teste..."
+	sshexec ${HOST1} "killall iperf3 2> /dev/null ; killall bwm-ng 2> /dev/null" A
+	startiperfservers
+	for BANDWIDTH in ${BANDWIDTH_LIST}; do
+		echo "Considerando uma banda de ${BANDWIDTH}Mbits/s para cada fluxo"
+		for i in $(seq 1 $SAMPLES); do
+			start_time=$(date +%s)
+			echo "Sample # ${i}: Started in: ${start_time}"
+			iperftxhost "a${i}" "${BANDWIDTH}"
+			end_time=$(date +%s)
+			echo "Sample # ${i}: Finished in: ${end_time}"
 		done
-	fi
+	done
+	stopiperfservers
+}
 
-	if [ "${OPT}" == "txr" ]; then
-		iperftxrouter
-	fi
-
-	if [ "${OPT}" == "rxh" ]; then
-		iperfrxhost
-	fi
-
-	if [ "${OPT}" == "rxr" ]; then
-		iperfrxrouter
-	fi
-
-	if [ "${OPT}" == "" ]; then
-		echo "Informe txh (tx-host), txr (tx-router), rxh (rx-host) ou rxr (rx-router)"
+main() {
+	if [ "${1}" == "startbwmcore" ]; then
+		startbwmcore ${2}
+	elif [ "${1}" == "stopbwmcore" ]; then
+		stopbwmcore ${2} ${3} ${4}
+	else
+		starttest3
 	fi
 }
 
-main
+main $1 $2 $3 $4

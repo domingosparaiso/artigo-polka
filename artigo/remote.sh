@@ -11,7 +11,7 @@ for index in ${CORES} ${EDGES} ${HOSTS}; do
 	CONT=${CONT}+1
 	COMPUTERS[${index}]=${CONT}
 done
-while [ "$1" != "" ]; do
+while [ "$1" != "" -a "${1:0:1}" == "-" ]; do
 	if [ "$1" == "-c" ]; then
 		EDGES=""
 		HOSTS=""

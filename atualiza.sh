@@ -1,5 +1,7 @@
 #!/bin/bash
 
+TOPOLOGIA=""
+TESTE=""
 cd /rtr
 if [ "$1" != "" ]; then
 	if [ "$1" == "--clean" -o "$1" == "-c" ]; then
@@ -17,13 +19,15 @@ if [ "$1" != "" ]; then
 			fi
 			exit
 		else
-			TOPOLOGIA=$1
-			echo ${TOPOLOGIA} > topologia.txt
+			TOPOLOGIA="${1}"
+			TESTE="\/${2}"
+			echo ${TOPOLOGIA}:${TESTE} > topologia.txt
 		fi
 	fi
 else
 	if [ -f topologia.txt ]; then
-		TOPOLOGIA=$(cat topologia.txt)
+		TOPOLOGIA=$(cat topologia.txt | cut -f1 -d:)
+		TESTE="$(cat topologia.txt | cut -f2 -d:)"
 	fi
 	if [ "${TOPOLOGIA}" == "" ]; then
 		echo "Informe a topologia."
@@ -38,7 +42,7 @@ REMOTE="${SSHREMOTE}:~/artigo-polka/"
 scp ${REMOTE}lista.txt .
 
 for ARQ in $(cat lista.txt); do
-	ARQ_REMOTO=$(echo ${ARQ} | sed "s/{HOST}/-${ROUTER}/g;s/{TOPOLOGIA}/${TOPOLOGIA}\//g")
+	ARQ_REMOTO=$(echo ${ARQ} | sed "s/{HOST}/-${ROUTER}/g;s/{TOPOLOGIA}/${TOPOLOGIA}${TESTE}\//g")
 	ARQ_LOCAL=$(echo ${ARQ} | sed "s/{HOST}//g;s/{TOPOLOGIA}//g")
 	echo "copiando ${ARQ_REMOTO} para ${ARQ_LOCAL}"
 	scp ${REMOTE}${ARQ_REMOTO} ${ARQ_LOCAL}

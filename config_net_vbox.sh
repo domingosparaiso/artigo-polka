@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "" ];then
-	echo "Informe a nome da topologia que deseja configurar."
+	echo "Informe o diretório onde estão localizados os arquivos de configuração da topologia que deseja configurar."
 	exit
 fi
 
@@ -42,6 +42,9 @@ if [ -f $1/networks.txt ]; then
 			eth4)
 				NIC=5
 				;;
+			eth5)
+				NIC=6
+				;;
 			esac
 			if [ "${NIC}" != "" ]; then
 				echo "Configurando ${INTERFACE} na rede ${NETWORK}"
@@ -60,6 +63,7 @@ if [ -f $1/networks.txt ]; then
 					VBoxManage modifyvm "${VM}" --nat-pf${NIC} SSH,tcp,,22${NUMPF},10.0.2.15,22
 					VBoxManage modifyvm "${VM}" --nat-pf${NIC} TELNET,tcp,,23${NUMPF},10.0.2.15,23
 					CONTPF=${CONTPF}+1
+					echo "Configurando interface NAT na sequencia ${NUMPF}"
 				else
 					VBoxManage modifyvm "${VM}" --nic${NIC} intnet
 					VBoxManage modifyvm "${VM}" --intnet${NIC} "${NETWORK}"
