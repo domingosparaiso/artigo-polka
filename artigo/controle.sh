@@ -45,7 +45,7 @@ done
 
 if [ "${LISTA}" == "" -o "${CMD}" == "" ]; then
 	echo "Informe as máquinas virtuais para inicialização."
-	echo "control_headless.sh [-a | -c | -e | -h | -l \"lista\"] [-p | -r]"
+	echo "controle.sh [-a | -c | -e | -h | -l \"lista\"] [-p | -r]"
 	echo ""
 	echo "Seleção de máquinas:"
 	echo "  -a             Todas as máquinas da topologia"

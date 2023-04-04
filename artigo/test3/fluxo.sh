@@ -14,10 +14,17 @@ if [ "$1" == "1" -o "$1" == "2" ]; then
 	echo -e "sh ipv4 pbr v1\nexit" | nc localhost 2306
 	echo -e "sh ipv4 pbr v1\nexit" | nc localhost 2307
 else
-	echo "Informe a configuração (1 ou 2)"
-	echo ""
-	echo "Configuração 1: todos os fluxos pelo tunnel1"
-	echo "Configuração 2: fluxo1 (tos=0x20) pelo tunnel1"
-	echo "                fluxo2 (tos=0x40) pelo tunnel2"
-	echo "                fluxo3 (tos=0x80) pelo tunnel3"
+	if [ "$1" == "-i" ]; then
+		echo -e "sh ipv4 pbr v1\nexit" | nc localhost 2306
+		echo -e "sh ipv4 pbr v1\nexit" | nc localhost 2307
+	else
+		echo "Informe a configuração (1 ou 2)"
+		echo ""
+		echo "Configuração 1: todos os fluxos pelo tunnel1"
+		echo "Configuração 2: fluxo1 (tos=0x20) pelo tunnel1"
+		echo "                fluxo2 (tos=0x40) pelo tunnel2"
+		echo "                fluxo3 (tos=0x80) pelo tunnel3"
+		echo ""
+		echo "-i para informação sobre os fluxos"
+	fi
 fi

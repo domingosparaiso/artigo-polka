@@ -33,6 +33,6 @@ for taxa in [ 10, 20, 40, 80, 120 ]:
 		current_values = plt.gca().get_yticks().tolist()
 		plt.gca().set_yticklabels(['{:.0f}'.format(x) for x in current_values])
 		print(f'Sample {sample}: OK')
-		plt.savefig(f'results/run{run}/{taxa}.png')
+		plt.savefig(f'results/run{run}/{taxa}-{sample}.png')
 		plt.clf()
 

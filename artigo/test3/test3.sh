@@ -1,14 +1,17 @@
 #!/bin/bash
 
-declare -g BANDWIDTH_LIST="10 20 40 80 120"
+declare -g RUN=3
+declare -g BANDWIDTH_LIST="80"
 declare -g INTERFACE="enp0s8"    # interface de saída do host1 para o edge1
 declare -g IP_HOST="40.40.2.2"   # ip do host2
-declare -g IPERFTIME=60
-declare -g SLEEPTIME=60
+declare -g IPERFTIME=240
+declare -g SLEEPTIME=240
 declare -g DELAY=2
 declare -g SAMPLES=5 # Número de vezes que o teste será realizado.
 declare -g HOST1=8
 declare -g HOST2=9
+declare -g -a LIMIT_TUNNEL=[0,0,0,0]
+
 SCRIPT_FLUXO=~/artigo-polka/artigo/test3/fluxo.sh
 
 scpexec() {
@@ -33,18 +36,18 @@ sshexec() {
 stopbwmcore() {
 	CORE=$(echo $1 | cut -f1 -d:)
 	INTERFACE=$(echo $1 | cut -f2 -d:)
-	
-	FILENAME=$2
+	SAMPLE=$2
 	BANDWIDTH=$3
 	echo "Finalizando bwm-ng pela porta 220${CORE}"
-	sshexec ${CORE} "killall bwm-ng 2> /dev/null ; grep ${INTERFACE} tmp.bwm > ${FILENAME}.csv ; rm tmp.bwm"
-	scpexec ${CORE} ${FILENAME}.csv test3/${BANDWIDTH}/${FILENAME}-${CORE}.csv
+	sshexec ${CORE} "killall bwm-ng 2> /dev/null ; grep ${INTERFACE} tmp.bwm > a${SAMPLE}-a${CORE}.csv"
+	mkdir -p data/run${RUN}/${BANDWIDTH}/${SAMPLE}
+	scpexec ${CORE} a${SAMPLE}-a${CORE}.csv data/run${RUN}/${BANDWIDTH}/${SAMPLE}/a${CORE}.csv
 }
 
 startbwmcore() {
 	CORE=$(echo $1 | cut -f1 -d:)
 	echo "Iniciando bwm-ng pela porta 220${CORE}"
-	sshexec ${CORE} "bwm-ng -t 1000 -o csv -u bytes -T rate -C ',' > tmp.bwm"
+	sshexec ${CORE} "bwm-ng -t 5000 -o csv -u bytes -T rate -C ',' > tmp.bwm"
 }
 
 startiperfservers() {
@@ -65,39 +68,43 @@ stopiperfservers() {
 
 
 trocafluxo() {
-	echo "Configurando fluxo: $1"
+	echo "-----------------------"
+	echo " Configurando fluxo: $1"
+	echo "-----------------------"
 	${SCRIPT_FLUXO} $1 > /dev/null
 }
 
 iperftxhost() {
-	FILENAME="$1"
+	SAMPLE="$1"
 	BANDWIDTH="$2"
 	trocafluxo 1
 	while read C; do
 		$0 startbwmcore ${C} &
-	done < core-routers.txt
-	echo "Iniciando bwm-ng no host1"
-	sshexec ${HOST1} "bwm-ng -t 1000 -o csv -u bytes -T rate -C ',' > tmp.bwm" P
+	done < <(cat core-routers.txt | grep -v '^#')
+#	echo "Iniciando bwm-ng no host2"
+#	echo "-------------------------"
+#	sshexec ${HOST2} "bwm-ng -t 1000 -o csv -u bytes -T rate -C ',' > tmp.bwm" P
 	sleep ${DELAY}
 	for fluxo in 1 2; do
 		if [ "${fluxo}" != "1" ]; then
 			trocafluxo ${fluxo}
 		fi
-		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5000 --tos 32  1>/dev/null" P  ### UDP
-		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5001 --tos 64  1>/dev/null" P  ### UDP
-		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5002 --tos 128 1>/dev/null" P  ### UDP
+#	sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5000 --tos 32  1>/dev/null" P  ### UDP
+#	sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5001 --tos 64  1>/dev/null" P  ### UDP
+#	sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5002 --tos 128 1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${LIMIT_TUNNEL[1]}m -p 5000 --tos 32  1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${LIMIT_TUNNEL[2]}m -p 5001 --tos 64  1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${LIMIT_TUNNEL[3]}m -p 5002 --tos 128 1>/dev/null" P  ### UDP
 		sleep $((${SLEEPTIME} - ${DELAY})) 2> /dev/null
 		sshexec ${HOST1} "killall iperf3"
 	done
 	while read C; do
-		$0 stopbwmcore ${C} ${FILENAME} ${BANDWIDTH} &
-	done < core-routers.txt
-	echo "Finalizando bwm-ng no host1"
-	sshexec ${HOST1} "killall bwm-ng"
-	mkdir -p test3/${BANDWIDTH}
-	scpexec ${HOST1} tmp.bwm .
-	grep ${INTERFACE} tmp.bwm > test3/${BANDWIDTH}/${FILENAME}.csv
-	rm tmp.bwm
+		$0 stopbwmcore ${C} ${SAMPLE} ${BANDWIDTH} &
+	done < <(cat core-routers.txt | grep -v '^#')
+#	echo "Finalizando bwm-ng no host1"
+#	sshexec ${HOST2} "killall bwm-ng 2> /dev/null ; grep ${INTERFACE} tmp.bwm > a1.csv"
+#	mkdir -p data/run${RUN}/${BANDWIDTH}/${SAMPLE}
+#	scpexec ${HOST2} a1.csv data/run${RUN}/${BANDWIDTH}/${SAMPLE}/a1.csv
 	sleep "${DELAY}"
 }
 
@@ -110,7 +117,7 @@ starttest3() {
 		for i in $(seq 1 $SAMPLES); do
 			start_time=$(date +%s)
 			echo "Sample # ${i}: Started in: ${start_time}"
-			iperftxhost "a${i}" "${BANDWIDTH}"
+			iperftxhost ${i} ${BANDWIDTH}
 			end_time=$(date +%s)
 			echo "Sample # ${i}: Finished in: ${end_time}"
 		done
@@ -124,6 +131,11 @@ main() {
 	elif [ "${1}" == "stopbwmcore" ]; then
 		stopbwmcore ${2} ${3} ${4}
 	else
+		while read LIM; do
+			INDX=$(echo ${LIM} | cut -f1 -d=)
+			VELO=$(echo ${LIM} | cut -f2 -d=)
+			LIMIT_TUNNEL[${INDX}]=${VELO}
+		done < <(cat netlimits.txt | grep '=')
 		starttest3
 	fi
 }
