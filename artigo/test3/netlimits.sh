@@ -20,11 +20,14 @@ add_limits() {
 	while read LIN; do
 		VM=$(echo ${LIN} | cut -f1 -d:)
 		INTERFACE=$(echo ${LIN} | cut -f2 -d:)
-		LIMIT=$(echo ${LIN} | cut -f3 -d:)
-		# Adicionando os novos limites
-		vboxmanage bandwidthctl ${VM} add Limit${INTERFACE} --type network --limit ${LIMIT_TUNNEL[${LIMIT}]}m
-		# Aplicando os limites nas interfaces
-		vboxmanage modifyvm ${VM} --nicbandwidthgroup${INTERFACE} Limit${INTERFACE}
+		INDEX=$(echo ${LIN} | cut -f3 -d:)
+		LIMIT=${LIMIT_TUNNEL[${INDEX}]}
+		if [ "${LIMIT}" != "0" ]; then
+			# Adicionando os novos limites
+			vboxmanage bandwidthctl ${VM} add Limit${INTERFACE} --type network --limit ${LIMIT}m
+			# Aplicando os limites nas interfaces
+			vboxmanage modifyvm ${VM} --nicbandwidthgroup${INTERFACE} Limit${INTERFACE}
+		fi
 	done < <(cat netlimits.txt | grep -v '=')
 }
 
@@ -33,9 +36,11 @@ update_limits() {
 	while read LIN; do
 		VM=$(echo ${LIN} | cut -f1 -d:)
 		INTERFACE=$(echo ${LIN} | cut -f2 -d:)
-		LIMIT=$(echo ${LIN} | cut -f3 -d:)
+		INDEX=$(echo ${LIN} | cut -f3 -d:)
+		LIMIT=${LIMIT_TUNNEL[${INDEX}]}m
+		[ "${LIMIT}" == "0m" ] && LIMIT=0
 		# Atualizando os limites
-		vboxmanage bandwidthctl ${VM} set Limit${INTERFACE} --limit ${LIMIT_TUNNEL[${LIMIT}]}m
+		vboxmanage bandwidthctl ${VM} set Limit${INTERFACE} --limit ${LIMIT} 2> /dev/null
 	done < <(cat netlimits.txt | grep -v '=')
 }
 

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-declare -g RUN=3
-declare -g BANDWIDTH_LIST="80"
+declare -g RUN=4
+declare -g BANDWIDTH_LIST="100"
 declare -g INTERFACE="enp0s8"    # interface de saída do host1 para o edge1
 declare -g IP_HOST="40.40.2.2"   # ip do host2
 declare -g IPERFTIME=240
 declare -g SLEEPTIME=240
 declare -g DELAY=2
-declare -g SAMPLES=5 # Número de vezes que o teste será realizado.
+declare -g SAMPLES=10 # Número de vezes que o teste será realizado.
 declare -g HOST1=8
 declare -g HOST2=9
 declare -g -a LIMIT_TUNNEL=[0,0,0,0]
@@ -92,9 +92,9 @@ iperftxhost() {
 #	sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5000 --tos 32  1>/dev/null" P  ### UDP
 #	sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5001 --tos 64  1>/dev/null" P  ### UDP
 #	sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${BANDWIDTH}m -p 5002 --tos 128 1>/dev/null" P  ### UDP
-		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${LIMIT_TUNNEL[1]}m -p 5000 --tos 32  1>/dev/null" P  ### UDP
-		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${LIMIT_TUNNEL[2]}m -p 5001 --tos 64  1>/dev/null" P  ### UDP
-		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -u -b ${LIMIT_TUNNEL[3]}m -p 5002 --tos 128 1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -p 5000 --tos 32  1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -p 5001 --tos 64  1>/dev/null" P  ### UDP
+		sshexec ${HOST1} "iperf3 -c ${IP_HOST} -t ${IPERFTIME} -N -p 5002 --tos 128 1>/dev/null" P  ### UDP
 		sleep $((${SLEEPTIME} - ${DELAY})) 2> /dev/null
 		sshexec ${HOST1} "killall iperf3"
 	done
@@ -116,6 +116,7 @@ starttest3() {
 		echo "Considerando uma banda de ${BANDWIDTH}Mbits/s para cada fluxo"
 		for i in $(seq 1 $SAMPLES); do
 			start_time=$(date +%s)
+			echo "================================================================="
 			echo "Sample # ${i}: Started in: ${start_time}"
 			iperftxhost ${i} ${BANDWIDTH}
 			end_time=$(date +%s)

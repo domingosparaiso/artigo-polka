@@ -9,18 +9,18 @@ access-list fluxoicmp
  exit
 !
 access-list fluxo1
- sequence 10 permit 17 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 32
-! sequence 10 permit  6 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 32
+! sequence 10 permit 17 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 32
+ sequence 10 permit  6 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 32
  exit
 !
 access-list fluxo2
- sequence 10 permit 17 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 64
-! sequence 10 permit  6 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 64
+! sequence 10 permit 17 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 64
+ sequence 10 permit  6 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 64
  exit
 !
 access-list fluxo3
- sequence 10 permit 17 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 128
-! sequence 10 permit  6 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 128
+! sequence 10 permit 17 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 128
+ sequence 10 permit  6 40.40.2.0 255.255.255.0 all 40.40.1.2 255.255.255.255 all tos 128
  exit
 !
 server telnet tel
