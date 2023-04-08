@@ -1,22 +1,29 @@
 import matplotlib.pyplot as plt
+import numpy
 
-for sample in range(0,10):
-	f=open(f'a{sample}.log')
+y=[]
+x=[]
+for sample in range(0,6):
+	f=open(f'data/a{sample}.log')
 	linhas=f.readlines()
 	f.close()
 
-	y=[]
-	x=[]
-	cont=1
+	cont=0
 	for ms in linhas:
-		x.append(cont)
+		if sample==0:
+			x.append(cont+1)
+			y.append([])
+		y[cont].append(float(ms))
 		cont=cont+1
-		y.append(float(ms))
+m=[]
+d=[]
+for cont in range(0,len(y)):
+	m.append(numpy.mean(y[cont]))
 
-	plt.plot(x, y)
-	plt.xlabel('packet') 
-	plt.ylabel('Latency (ms)') 
-	plt.title(f'Sample{sample}')
-	print(f'a{sample}: OK')
+#plt.errorbar(x,m,yerr=d, fmt='-')
+plt.plot(x, m)
+plt.xlabel('Tempo (s)') 
+plt.ylabel('Latência (ms)') 
+plt.title('Diminuição da latência com migração de túnel')
 plt.savefig(f'test1.png')
 
