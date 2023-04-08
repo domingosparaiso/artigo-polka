@@ -2,13 +2,14 @@
 # executar "./test2.sh rx" no host2
 # executar "./test2.sh tx" no host1
 
+declare -g RUN=5
 declare -g OPT=$1
 declare -g INTERFACE="enp0s8"  # interface de saída do host1 para o edge1
 declare -g IP="40.40.2.2"      # ip do host2
-declare -g IPERFTIME=600
-declare -g SLEEPTIME=600
+declare -g IPERFTIME=60
+declare -g SLEEPTIME=60
 declare -g DELAY=2
-declare -g SAMPLES=10 # Número de vezes que o teste será realizado.
+declare -g SAMPLES=20 # Número de vezes que o teste será realizado.
 SSHCONNECTION=$(cat ssh_connection.txt)
 SCRIPT_TUNNEL="~/artigo-polka/artigo/tunnel.sh"
 
@@ -36,8 +37,8 @@ iperftx () {
 		killall iperf
 	done
 	killall bwm-ng
-	mkdir -p test2/${BANDWIDTH}
-	grep ${INTERFACE} tmp.bwm > test2/${BANDWIDTH}/${FILENAME}.csv
+	mkdir -p data/run${RUN}/${BANDWIDTH}
+	grep ${INTERFACE} tmp.bwm > data/run${RUN}/${BANDWIDTH}/${FILENAME}.csv
 	rm tmp.bwm
 	sleep "${DELAY}"
 }
@@ -46,7 +47,7 @@ main() {
 	if [ "${OPT}" == "tx" ]; then
 		killall iperf
 		killall bwm-ng
-		for j in $(seq 10 10 100); do
+		for j in 10 20 30 40; do
 			echo "Considerando uma banda de ${j}Mbits/s"
 			for i in $(seq 1 $SAMPLES); do
 				start_time=$(date +%s)

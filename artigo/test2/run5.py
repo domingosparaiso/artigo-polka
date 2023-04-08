@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 
-run=3
+run=5
 #csv output format: Type rate:
 #unix timestamp;iface_name;bytes_out/s;bytes_in/s;bytes_total/s;bytes_in;bytes_out;packets_out/s;packets_in/s;packets_total/s;packets_in;packets_out;errors_out/s;errors_in/s;errors_in;errors_out\n
 
-for taxa in range(10, 30, 10):
-	for sample in range(1, 6):
+for taxa in range(10, 50, 10):
+	for sample in range(1, 21):
 		arq=f'data/run{run}/{taxa}/a{sample}.csv'
 		print(arq)
 		f=open(arq)
