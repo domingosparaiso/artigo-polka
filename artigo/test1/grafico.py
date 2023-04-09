@@ -16,7 +16,6 @@ for sample in range(0,6):
 		y[cont].append(float(ms))
 		cont=cont+1
 m=[]
-d=[]
 for cont in range(0,len(y)):
 	m.append(numpy.mean(y[cont]))
 
