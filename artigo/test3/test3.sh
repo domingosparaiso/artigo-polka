@@ -1,13 +1,13 @@
 #!/bin/bash
 
 declare -g RUN=4
-declare -g BANDWIDTH_LIST="100"
+declare -g BANDWIDTH_LIST="40"
 declare -g INTERFACE="enp0s8"    # interface de saída do host1 para o edge1
 declare -g IP_HOST="40.40.2.2"   # ip do host2
 declare -g IPERFTIME=240
 declare -g SLEEPTIME=240
 declare -g DELAY=2
-declare -g SAMPLES=10 # Número de vezes que o teste será realizado.
+declare -g SAMPLES=20 # Número de vezes que o teste será realizado.
 declare -g HOST1=8
 declare -g HOST2=9
 declare -g -a LIMIT_TUNNEL=[0,0,0,0]
