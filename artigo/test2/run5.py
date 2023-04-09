@@ -21,8 +21,7 @@ for taxa in [40]:
 				x.append(cont)
 				y.append([])
 			b=dado.split(',')[2]
-			fb=float(b)/1024/1024
-			print(cont-1)
+			fb=float(b)/1024/1024*8
 			y[cont-1].append(fb)
 			cont=cont+1
 			if cont > 177:

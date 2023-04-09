@@ -20,7 +20,7 @@ run=4
 # 14 errors_in
 # 15 errors_out 
 
-linkname=['MIA-SAO','CHI-AMS','MIA-CHI','MIA-CAL','','AMS-AMS_edge']
+linkname=['MIA-SAO','CHI-AMS','MIA-CHI','MIA-CAL','','host2']
 for taxa in [ 100 ]:
 	print(f'Taxa: {taxa}mb')
 	for sample in range(1, 11):
@@ -37,16 +37,14 @@ for taxa in [ 100 ]:
 				x.append(cont)
 				cont=cont+1
 				b=dado.split(',')[3]
-				fb=float(b)
-				y.append(float(b))
+				fb=float(b)/1024/1024*8
+				y.append(fb)
 			plt.yscale('linear')
 			plt.plot(x, y, label=linkname[router-2])
-			plt.xlabel('time')
-		plt.ylabel('bytes total') 
+		plt.xlabel('Tempo (s)')
+		plt.ylabel('Vazão (Mbps)') 
 		plt.legend(title='Link:', loc='lower left')
-		plt.title('Redirecionamento de fluxo')
-		current_values = plt.gca().get_yticks().tolist()
-		plt.gca().set_yticklabels(['{:.0f}'.format(x) for x in current_values])
+		plt.title('Agregação de fluxos com uso de políticas')
 		print(f'Sample {sample}: OK')
 		plt.savefig(f'results/run{run}/{taxa}-{sample}.png')
 		plt.clf()
