@@ -23,11 +23,13 @@ for sample in range(0,6):
 		y[cont].append(float(ms))
 		cont=cont+1
 m=[]
+d=[]
 for cont in range(0,len(y)):
 	m.append(numpy.mean(y[cont]))
+	d.append(numpy.std(y[cont]))
 
-#plt.errorbar(x,m,yerr=d, fmt='-')
-plt.plot(x, m, linewidth=1, marker='o', markersize=2 )
+plt.errorbar(x,m,yerr=d, fmt='-', linewidth=1, color='red')
+plt.plot(x, m, linewidth=2, marker='o', markersize=3, color='blue')
 plt.xlabel('Tempo (s)') 
 plt.ylabel('Latência (ms)') 
 plt.title('Diminuição da latência com migração de túnel')

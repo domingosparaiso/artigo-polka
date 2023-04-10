@@ -34,15 +34,16 @@ for taxa in [40]:
 			if cont > 177:
 				break
 	m=[]
+	d=[]
 	for cont in range(0,len(y)):
 		m.append(numpy.mean(y[cont]))
-	plt.plot(x, m, linewidth=1, marker='o', markersize=2)
+		d.append(numpy.std(y[cont]))
+	plt.errorbar(x,m,yerr=d, fmt='-', linewidth=1, color='red')
+	plt.plot(x, m, linewidth=2, marker='o', markersize=3, color='blue')
 	print(f'a{sample}: OK')
 	plt.xlabel('Tempo (s)') 
 	plt.ylabel('Vazão (Mbps)') 
 	plt.title(f'Reação a falhas com migração de túnel')
-	#current_values = plt.gca().get_yticks().tolist()
-	#plt.gca().set_yticklabels(['{:.0f}'.format(x) for x in current_values])
 	plt.savefig(f'results/run{run}/{taxa}.png')
 	plt.clf()
 
