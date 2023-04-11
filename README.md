@@ -4,8 +4,8 @@ Os arquivos neste repositório foram usados na pesquisa usada na escrita do arti
 
 ## Organização dos arquivos
 
-- artigo - diretório contendo os experimentos do artigo
-- simple - diretório com uma topologia simples para testar o ambiente
+- \<artigo> - diretório contendo os experimentos do artigo
+- \<simple> - diretório com uma topologia simples para testar o ambiente
 - wpeif-2023.pdf - Artigo submetido ao workshop
 - atualiza.sh - script para atualização das configurações das máquinas virtuais
 - cfgnet.sh - script que configura os arquivos de hardware e software do RARE/freeRtr

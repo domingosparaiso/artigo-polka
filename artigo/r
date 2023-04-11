@@ -1,6 +1,0 @@
-#!/bin/bash
-# Atualiza, reconfigura e inicia o freeRtr com as configurações do servidor
-
-cd /rtr
-./atualiza.sh $1
-./rtr.sh

@@ -6,11 +6,7 @@
 - networks.txt - tabela contendo nome da VM, Interface, MAC Address e Nome da rede interna
 - remote.sh - script que executa comandos ou copia arquivos em várias VMs
 - simple.png - topologia simples que é implementada com estes arquivos
-- template-core1-hw.txt - Configuração de software do core1
-- template-core1-sw.txt - Configuração de hardware do core1
-- template-edge1-hw.txt - Configuração de software do edge1
-- template-edge1-sw.txt - Configuração de harware do edge1
-- template-edge2-hw.txt - Configuração de software do edge2
-- template-edge2-sw.txt - Configuração de harware do edge2
+- template-XXXX-hw.txt - Configuração de software do roteador XXXX
+- template-XXXX-sw.txt - Configuração de hardware do roteador XXXX
 
 ![topologia](simple.png)

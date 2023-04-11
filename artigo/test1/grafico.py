@@ -26,9 +26,9 @@ m=[]
 d=[]
 for cont in range(0,len(y)):
 	m.append(numpy.mean(y[cont]))
-	d.append(numpy.std(y[cont]))
+#	d.append(numpy.std(y[cont]))
 
-plt.errorbar(x,m,yerr=d, fmt='-', linewidth=1, color='red')
+#plt.errorbar(x,m,yerr=d, fmt='-', linewidth=1, color='red')
 plt.plot(x, m, linewidth=2, marker='o', markersize=3, color='blue')
 plt.xlabel('Tempo (s)') 
 plt.ylabel('Latência (ms)') 
