@@ -13,3 +13,4 @@
 - template-edge2-hw.txt - Configuração de software do edge2
 - template-edge2-sw.txt - Configuração de harware do edge2
 
+![topologia](simple.png)
