@@ -15,4 +15,4 @@
 - test3.sh - script que executa o experimento, executar direto no guest
 - topologia3.png - topologia usada neste experimento, mostra os limites
 
-![topologia](topologia2.png)
+![topologia](topologia3.png)
