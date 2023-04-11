@@ -12,7 +12,7 @@ declare -g HOST1=8
 declare -g HOST2=9
 declare -g -a LIMIT_TUNNEL=[0,0,0,0]
 
-SCRIPT_FLUXO=~/artigo-polka/artigo/test3/fluxo.sh
+SCRIPT_FLUXO=~/wpeif-2023/artigo/test3/fluxo.sh
 
 scpexec() {
 	PORT=$1

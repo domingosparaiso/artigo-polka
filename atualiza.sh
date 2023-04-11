@@ -37,7 +37,7 @@ fi
 
 ROUTER=$(hostname)
 SSHREMOTE=$(cat ssh_connection.txt)
-REMOTE="${SSHREMOTE}:~/artigo-polka/"
+REMOTE="${SSHREMOTE}:~/wpeif-2023/"
 
 scp ${REMOTE}lista.txt .
 

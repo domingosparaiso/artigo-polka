@@ -5,7 +5,7 @@ SAMPLES=10
 IP=40.40.2.2
 DELAY=60
 SSHCONNECTION=$(cat ssh_connection.txt)
-SCRIPT_TUNNEL="~/artigo-polka/artigo/tunnel.sh"
+SCRIPT_TUNNEL="~/wpeif-2023/artigo/tunnel.sh"
 tunel()
 {
 	echo "Tunnel: $1"

@@ -11,7 +11,7 @@ declare -g SLEEPTIME=120
 declare -g DELAY=2
 declare -g SAMPLES=20 # Número de vezes que o teste será realizado.
 SSHCONNECTION=$(cat ssh_connection.txt)
-SCRIPT_TUNNEL="~/artigo-polka/artigo/tunnel.sh"
+SCRIPT_TUNNEL="~/wpeif-2023/artigo/tunnel.sh"
 
 iperfrx () {
 	iperf3 -s -p 5000 # UDP
