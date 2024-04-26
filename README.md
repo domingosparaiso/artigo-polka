@@ -65,7 +65,7 @@ modelo:~# cd /rtr
 modelo:/rtr# ./atualiza.sh -h core1
 ```
 
-* Ao concluir a criação de todas as máquinas virtuais, com as máquinas desligadas, execute no guest o script 'remove-nic.sh', ele vai remover todas as configurações de placas de rede das máquinas virtuais deixando preparadas para a configuração da topologia.
+* Ao concluir a criação de todas as máquinas virtuais, com as máquinas desligadas, execute no guest o script 'remove-all-nics.sh', ele vai remover todas as configurações de placas de rede das máquinas virtuais deixando preparadas para a configuração da topologia.
 
 
 * Execute o script 'config_net_vbox.sh' informando o diretório onde está o arquivo 'networks.txt' que você deseja configurar, para a topologia 'simple' este é o nome do diretório mas para a topologia do artigo informe também o teste que deseja configurar, exemplo: 'artigo/test1'. O script vai configurar as interfaces de rede de todas as máquinas virtuais e inserir as configurações das redes internas usando as informações do arquivo 'network.txt', neste arquivo estão indicadas os nomes das VMs, as interfaces que serão ativadas, seus MAC Address e a rede onde elas serão configuradas, caso o nome da rede seja NAT a interface será configurada como NAT no VirtualBox e inseridos Port-Forward para os protocolos SSH e TELNET, caso contrário será configurada como Internal Network e o nome especificado será o nome da rede interna.
